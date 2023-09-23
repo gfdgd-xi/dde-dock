@@ -157,7 +157,17 @@ int main(int argc, char *argv[])
 
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     DockApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    DockApplication app(argc, argv);
+    // 强制使用 DTK 平台插件
+    QVector<char *> fakeArgs(argc + 2);
+    fakeArgs[0] = argv[0];
+    fakeArgs[1] = const_cast<char *>("-platformtheme");
+    fakeArgs[2] = const_cast<char *>("deepin");
+    for (int i = 1; i < argc; i++)
+    {
+        fakeArgs[i + 2] = argv[i];
+    }
+    int fakeArgc = argc + 2; // QCoreApplication 的 argc 要用引用，避免 c++ 编译器优化
+    DockApplication app(fakeArgc, fakeArgs.data());
 
     //崩溃信号
     signal(SIGSEGV, sig_crash);
